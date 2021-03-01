@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -26,7 +27,14 @@ namespace AceSearch
                 var settings = new Settings();
                 configuration.GetSection("SearchSettings").Bind(settings);
 
-                using (var client = new HttpClient())
+                //ServicePointManager.ServerCertificateValidationCallback +=
+                //    (sender, certificate, chain, errors) => {
+                //        return true;
+                //    };
+                var handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback += (sender, certificate, chain, errors) => true;
+                
+                using (var client = new HttpClient(handler))
                 {
                     var json = await client.GetStringAsync(
                         "https://search.acestream.net/all?api_version=1.0&api_key=test_api_key");
