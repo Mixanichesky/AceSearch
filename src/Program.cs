@@ -48,7 +48,7 @@ namespace AceSearch
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("\nException!");
                 Console.WriteLine("Message :{0} ", e.Message);
                 Console.WriteLine(e.ToString());
             }
