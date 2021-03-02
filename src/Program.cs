@@ -37,7 +37,7 @@ namespace AceSearch
 
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
-                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).OrderBy(ch=>ch.Name).ToList();
+                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).OrderBy(ch => ch.Name).ToList();
                     await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson);
 
                     if (settings.CreateFavorite)
@@ -66,17 +66,21 @@ namespace AceSearch
             channels.ForEach(ch =>
             {
                 writer.WriteLine($"#EXTINF:-1,{ch.Name}");
-                writer.WriteLine($"infohash://{ch.Infohash}");
+                writer.WriteLine($"acestream://{ch.Infohash}");
             });
 
             if (createJson)
             {
-                var chs = channels.Select(ch => new
-                {
-                    name = ch.Name,
-                    url = ch.Infohash,
-                    cat = ch.Categories != null && ch.Categories.Any() ? ch.Categories.First() : "none"
 
+                var chs = channels.Select(ch =>
+                {
+                    var cat = ch.Categories != null && ch.Categories.Any() ? ch.Categories.First() : "none";
+                    return new
+                    {
+                        name = ch.Name,
+                        url = ch.Infohash,
+                        cat = !string.IsNullOrEmpty(cat) ? cat : "none"
+                    };
                 }).ToArray();
 
                 var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
