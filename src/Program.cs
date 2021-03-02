@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace AceSearch
 
                     if (settings.CreateFavorite)
                     {
-                        var favoriteChannels = channels.Where(ch => settings.FavoriteChannels.Any(fch => ch.Name.Contains(fch))).ToList();
+                        var favoriteChannels = allChannels.Where(ch => settings.FavoriteChannels.Any(fch => ch.Name.Contains(fch))).ToList();
                         await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson);
                     }
                 }
@@ -60,7 +61,7 @@ namespace AceSearch
         private static async Task SaveToFile(string path, string fileName, List<Channels> channels, bool createJson)
         {
             var filePath = Path.Combine(path, fileName);
-            using var writer = File.CreateText(filePath);
+            await using var writer = File.CreateText(filePath);
             writer.WriteLine("#EXTM3U");
             channels.ForEach(ch =>
             {
@@ -73,14 +74,16 @@ namespace AceSearch
                 var chs = channels.Select(ch => new
                 {
                     name = ch.Name,
-                    url = $"infohash://{ch.Infohash}",
-                    cat = ch.Categories != null ? string.Join(", ", ch.Categories) : ""
+                    url = ch.Infohash,
+                    cat = ch.Categories != null ? string.Join(", ", ch.Categories) : "none"
 
                 }).ToArray();
 
                 var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
-                using FileStream jsonWriter = File.Create(jsonFileName);
-                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs });
+
+                await using var jsonWriter = File.Create(jsonFileName);
+                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs },
+                    new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
             }
         }
     }
