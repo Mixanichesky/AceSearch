@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -27,13 +26,9 @@ namespace AceSearch
                 var settings = new Settings();
                 configuration.GetSection("SearchSettings").Bind(settings);
 
-                //ServicePointManager.ServerCertificateValidationCallback +=
-                //    (sender, certificate, chain, errors) => {
-                //        return true;
-                //    };
                 var handler = new HttpClientHandler();
                 handler.ServerCertificateCustomValidationCallback += (sender, certificate, chain, errors) => true;
-                
+
                 using (var client = new HttpClient(handler))
                 {
                     var json = await client.GetStringAsync(
@@ -42,12 +37,12 @@ namespace AceSearch
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
                         ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).ToList();
-                    SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels);
+                    await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson);
 
                     if (settings.CreateFavorite)
                     {
                         var favoriteChannels = channels.Where(ch => settings.FavoriteChannels.Any(fch => ch.Name.Contains(fch))).ToList();
-                        SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels);
+                        await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson);
                     }
                 }
 
@@ -62,7 +57,7 @@ namespace AceSearch
             }
         }
 
-        private static void SaveToFile(string path, string fileName, List<Channels> channels)
+        private static async Task SaveToFile(string path, string fileName, List<Channels> channels, bool createJson)
         {
             var filePath = Path.Combine(path, fileName);
             using var writer = File.CreateText(filePath);
@@ -72,6 +67,21 @@ namespace AceSearch
                 writer.WriteLine($"#EXTINF:-1,{ch.Name}");
                 writer.WriteLine($"infohash://{ch.Infohash}");
             });
+
+            if (createJson)
+            {
+                var chs = channels.Select(ch => new
+                {
+                    name = ch.Name,
+                    url = $"infohash://{ch.Infohash}",
+                    cat = ch.Categories != null ? string.Join(", ", ch.Categories) : ""
+
+                }).ToArray();
+
+                var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
+                using FileStream jsonWriter = File.Create(jsonFileName);
+                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs });
+            }
         }
     }
 
@@ -112,6 +122,7 @@ namespace AceSearch
         public int AvailabilityUpdatedAtHours { get; set; }
         public decimal Availability { get; set; }
         public bool CreateFavorite { get; set; }
+        public bool CreateJson { get; set; }
         public string OutputFolder { get; set; }
         public string PlayListAllFilename { get; set; }
         public string PlayListFavoriteFileName { get; set; }
