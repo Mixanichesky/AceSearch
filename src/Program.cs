@@ -37,7 +37,7 @@ namespace AceSearch
 
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
-                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).ToList();
+                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).OrderBy(ch=>ch.Name).ToList();
                     await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson);
 
                     if (settings.CreateFavorite)
