@@ -30,6 +30,7 @@ namespace AceSearch
 
                 using (var handler = new HttpClientHandler())
                 {
+
                     handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
                     using var client = new HttpClient(handler);
