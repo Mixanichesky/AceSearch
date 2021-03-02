@@ -75,7 +75,7 @@ namespace AceSearch
                 {
                     name = ch.Name,
                     url = ch.Infohash,
-                    cat = ch.Categories != null ? string.Join(", ", ch.Categories) : "none"
+                    cat = ch.Categories != null && ch.Categories.Any() ? ch.Categories.First() : "none"
 
                 }).ToArray();
 
