@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -14,7 +15,7 @@ namespace AceSearch
 
     class Program
     {
-        static async Task Main()
+        static async Task Main(string[] args)
         {
             try
             {
@@ -25,13 +26,13 @@ namespace AceSearch
 
                 var configuration = builder.Build();
                 var settings = new Settings();
-                configuration.GetSection("SearchSettings").Bind(settings);
+                configuration.Bind(settings);
 
-                var handler = new HttpClientHandler();
-                handler.ServerCertificateCustomValidationCallback += (sender, certificate, chain, errors) => true;
-
-                using (var client = new HttpClient(handler))
+                using (var handler = new HttpClientHandler())
                 {
+                    handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+                    using var client = new HttpClient(handler);
                     var json = await client.GetStringAsync(
                         "http://search.acestream.net/all?api_version=1.0&api_key=test_api_key");
 
