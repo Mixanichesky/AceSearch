@@ -73,7 +73,7 @@ namespace AceSearch
             var filePath = Path.Combine(path, fileName);
             await using var writer = File.CreateText(filePath);
             writer.WriteLine("#EXTM3U");
-            channels.ForEach(async ch =>
+            channels.ForEach(ch =>
             {
                 writer.WriteLine($"#EXTINF:-1,{ch.Name}");
                 writer.WriteLine($"acestream://{ch.Infohash}");
