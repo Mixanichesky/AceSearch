@@ -47,13 +47,13 @@ namespace AceSearch
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
                         ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).OrderBy(ch => ch.Name).ToList();
-                    await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson);
+                    await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson, settings.UrlTemplate);
 
                     if (settings.CreateFavorite)
                     {
                         var fChannelsList = settings.FavoriteChannels.Split(",").Select(fch => fch.Trim()).ToList();
                         var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name.Contains(fch))).ToList();
-                        await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson);
+                        await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson, settings.UrlTemplate);
                     }
                 }
 
@@ -68,15 +68,17 @@ namespace AceSearch
             }
         }
 
-        private static async Task SaveToFile(string path, string fileName, List<Channels> channels, bool createJson)
+        private static async Task SaveToFile(string path, string fileName, List<Channels> channels, bool createJson, string urlTemplate)
         {
             var filePath = Path.Combine(path, fileName);
             await using var writer = File.CreateText(filePath);
             writer.WriteLine("#EXTM3U");
+
             channels.ForEach(ch =>
             {
+                var url = string.Format(urlTemplate, ch.Infohash);
                 writer.WriteLine($"#EXTINF:-1,{ch.Name}");
-                writer.WriteLine($"acestream://{ch.Infohash}");
+                writer.WriteLine(url);
             });
 
             if (createJson)
@@ -142,6 +144,7 @@ namespace AceSearch
         public string OutputFolder { get; set; }
         public string PlayListAllFilename { get; set; }
         public string PlayListFavoriteFileName { get; set; }
+        public string UrlTemplate { get; set; }
         public string FavoriteChannels { get; set; }
     }
 }
