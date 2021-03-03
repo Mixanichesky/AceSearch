@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -19,10 +18,18 @@ namespace AceSearch
         {
             try
             {
+                var baseDirectory = AppContext.BaseDirectory;
+                var configName = "appsettings.json";
+                if (args != null && args.Any())
+                {
+                    baseDirectory = Path.GetDirectoryName(args[0]);
+                    configName = Path.GetFileName(args[0]);
+                }
+
                 var builder = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
+                    .SetBasePath(baseDirectory)
+                    .AddJsonFile(configName, optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables();
 
                 var configuration = builder.Build();
                 var settings = new Settings();
@@ -35,7 +42,7 @@ namespace AceSearch
 
                     using var client = new HttpClient(handler);
                     var json = await client.GetStringAsync(
-                        "http://search.acestream.net/all?api_version=1.0&api_key=test_api_key");
+                        "https://search.acestream.net/all?api_version=1.0&api_key=test_api_key");
 
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
@@ -44,7 +51,8 @@ namespace AceSearch
 
                     if (settings.CreateFavorite)
                     {
-                        var favoriteChannels = allChannels.Where(ch => settings.FavoriteChannels.Any(fch => ch.Name.Contains(fch))).ToList();
+                        var fChannelsList = settings.FavoriteChannels.Split(",").Select(fch => fch.Trim()).ToList();
+                        var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name.Contains(fch))).ToList();
                         await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson);
                     }
                 }
@@ -65,7 +73,7 @@ namespace AceSearch
             var filePath = Path.Combine(path, fileName);
             await using var writer = File.CreateText(filePath);
             writer.WriteLine("#EXTM3U");
-            channels.ForEach(ch =>
+            channels.ForEach(async ch =>
             {
                 writer.WriteLine($"#EXTINF:-1,{ch.Name}");
                 writer.WriteLine($"acestream://{ch.Infohash}");
@@ -73,7 +81,6 @@ namespace AceSearch
 
             if (createJson)
             {
-
                 var chs = channels.Select(ch =>
                 {
                     var cat = ch.Categories != null && ch.Categories.Any() ? ch.Categories.First() : "none";
@@ -135,6 +142,6 @@ namespace AceSearch
         public string OutputFolder { get; set; }
         public string PlayListAllFilename { get; set; }
         public string PlayListFavoriteFileName { get; set; }
-        public string[] FavoriteChannels { get; set; }
+        public string FavoriteChannels { get; set; }
     }
 }
