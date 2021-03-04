@@ -1,11 +1,17 @@
 # AceSearch
 
-1. build container:  docker build -t ace_search .
-
-2. Run buld: docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net5.0 --name ace_search ace_search
-
-3. Run AceSearch: dotnet AceSearch.dll <config file full name /opt/lists/config.json>
-
+1. build container:  
+```
+docker build -t ace_search .
+```
+2. Run build: 
+```
+docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net5.0 --name ace_search ace_search
+```
+3. Run AceSearch: 
+```
+dotnet AceSearch.dll <config file full name>
+```
 
 Sample config file:
 ```
