@@ -1,10 +1,10 @@
 # AceSearch
 
-1. build container:  
+1. build image:  
 ```
 docker build -t ace_search .
 ```
-2. Run build: 
+2. Run build project: 
 ```
 docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net5.0 --name ace_search ace_search
 ```
