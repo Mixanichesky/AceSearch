@@ -52,7 +52,7 @@ namespace AceSearch
                     if (settings.CreateFavorite)
                     {
                         var fChannelsList = settings.FavoriteChannels.Split(",").Select(fch => fch.Trim()).ToList();
-                        var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name.Contains(fch))).ToList();
+                        var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name.Contains(fch))).OrderBy(ch => ch.Name).ToList();
                         await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson, settings.UrlTemplate);
                     }
                 }
