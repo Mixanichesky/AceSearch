@@ -43,7 +43,7 @@ namespace AceSearch
                     using var client = new HttpClient(handler);
                     var json = await client.GetStringAsync(
                         "https://api.acestream.me/all?api_version=1.0&api_key=test_api_key");
-    
+
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
                         ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).OrderBy(ch => ch.Name).ToList();
@@ -97,8 +97,7 @@ namespace AceSearch
                 var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
 
                 await using var jsonWriter = File.Create(jsonFileName);
-                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs },
-                    new JsonSerializerOptions() { WriteIndented = true});
+                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs });
             }
         }
     }
