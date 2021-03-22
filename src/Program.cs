@@ -98,7 +98,7 @@ namespace AceSearch
 
                 await using var jsonWriter = File.Create(jsonFileName);
                 await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs },
-                    new JsonSerializerOptions() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    new JsonSerializerOptions() { WriteIndented = true});
             }
         }
     }
