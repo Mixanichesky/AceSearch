@@ -100,7 +100,12 @@ namespace AceSearch
                 var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
 
                 await using var jsonWriter = File.Create(jsonFileName);
-                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs }, new JsonSerializerOptions() { WriteIndented = true });
+                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs },
+                    new JsonSerializerOptions()
+                    {
+                        WriteIndented = true,
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    });
             }
         }
     }
