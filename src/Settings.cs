@@ -1,4 +1,6 @@
-﻿namespace AceSearch
+﻿using System.Text.Json.Serialization;
+
+namespace AceSearch
 {
     public class Settings
     {
@@ -10,6 +12,6 @@
         public string PlayListAllFilename { get; set; }
         public string PlayListFavoriteFileName { get; set; }
         public string UrlTemplate { get; set; }
-        public string FavoriteChannels { get; set; }
+        public string[] FavoriteChannels { get; set; }
     }
 }
