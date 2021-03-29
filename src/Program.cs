@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -46,7 +47,9 @@ namespace AceSearch
 
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
-                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours)).OrderBy(ch => ch.Name).ToList();
+                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours))
+                        .GroupBy(ch => ch.Name).Select(gr => gr.First()).OrderBy(ch => ch.Name).ToList();
+
                     await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson, settings.UrlTemplate);
 
                     if (settings.CreateFavorite)
@@ -97,7 +100,7 @@ namespace AceSearch
                 var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
 
                 await using var jsonWriter = File.Create(jsonFileName);
-                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs });
+                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs }, new JsonSerializerOptions() { WriteIndented = true });
             }
         }
     }
