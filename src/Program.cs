@@ -48,7 +48,7 @@ namespace AceSearch
                     var channels = JsonSerializer.Deserialize<Channels[]>(json);
                     var allChannels = channels.Where(ch =>
                         ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours))
-                        .GroupBy(ch => ch.Name.Trim()).Select(gr => gr.First()).OrderBy(ch => ch.Name).ToList();
+                        .GroupBy(ch => ch.Name).Select(gr => gr.First()).OrderBy(ch => ch.Name).ToList();
 
                     await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson, settings.UrlTemplate);
 
@@ -103,50 +103,5 @@ namespace AceSearch
                 await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs }, new JsonSerializerOptions() { WriteIndented = true });
             }
         }
-    }
-
-    public class Channels
-    {
-        [JsonPropertyName("infohash")] public string Infohash { get; set; }
-        [JsonPropertyName("name")] public string Name { get; set; }
-
-        [JsonPropertyName("availability")] public decimal Availability { get; set; }
-
-        [JsonPropertyName("categories")] public string[] Categories { get; set; }
-
-        [JsonPropertyName("availability_updated_at")]
-        [JsonConverter(typeof(ToDateTimeConverter))]
-        public DateTime AvailabilityUpdatedAt { get; set; }
-
-    }
-
-    public class ToDateTimeConverter : JsonConverter<DateTime>
-    {
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            DateTimeOffset.FromUnixTimeSeconds(1000);
-
-            if (!reader.TryGetInt64(out long value)) return new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            return DateTimeOffset.FromUnixTimeSeconds(value).ToLocalTime().DateTime;
-        }
-
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-
-        }
-    }
-
-    public class Settings
-    {
-        public int AvailabilityUpdatedAtHours { get; set; }
-        public decimal Availability { get; set; }
-        public bool CreateFavorite { get; set; }
-        public bool CreateJson { get; set; }
-        public string OutputFolder { get; set; }
-        public string PlayListAllFilename { get; set; }
-        public string PlayListFavoriteFileName { get; set; }
-        public string UrlTemplate { get; set; }
-        public string FavoriteChannels { get; set; }
     }
 }
