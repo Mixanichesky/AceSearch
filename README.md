@@ -6,7 +6,7 @@ docker build -t ace_search .
 ```
 2. Run build project: 
 ```
-docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net5.0 --name ace_search ace_search
+docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net7.0 --name ace_search ace_search
 ```
 3. Run AceSearch: 
 ```
@@ -28,7 +28,7 @@ Sample config file:
 }
 ```
 
-.NET Install: https://dotnet.microsoft.com/download/dotnet/5.0
+.NET Install: https://dotnet.microsoft.com/download/dotnet/7.0
 
 .NET Install scripts: https://docs.microsoft.com/dotnet/core/install/linux
 
@@ -39,5 +39,5 @@ sudo dpkg -i packages-microsoft-prod.deb
 sudo apt-get update
 sudo apt-get install -y apt-transport-https 
 sudo apt-get update 
-sudo apt-get install -y dotnet-runtime-5.0
+sudo apt-get install -y dotnet-runtime-7.0
 ```
