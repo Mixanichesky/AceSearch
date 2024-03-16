@@ -21,6 +21,7 @@ namespace AceSearch
                 if (args != null && args.Any())
                 {
                     baseDirectory = Path.GetDirectoryName(args[0]);
+                    if (string.IsNullOrEmpty(baseDirectory)) baseDirectory = AppContext.BaseDirectory;
                     configName = Path.GetFileName(args[0]);
                 }
 
