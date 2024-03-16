@@ -6,7 +6,7 @@ namespace AceSearch
     public class Channels
     {
         [JsonPropertyName("infohash")] 
-        public string Infohash { get; set; }
+        public string InfoHash { get; set; }
 
         [JsonPropertyName("name")]
         [JsonConverter(typeof(TrimmingJsonConverter))]

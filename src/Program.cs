@@ -83,7 +83,7 @@ namespace AceSearch
 
             channels.ForEach(ch =>
             {
-                var url = string.Format(urlTemplate, ch.Infohash);
+                var url = string.Format(urlTemplate, ch.InfoHash);
                 writer.WriteLine($"#EXTINF:-1,{ch.Name}");
                 writer.WriteLine(url);
             });
@@ -96,7 +96,7 @@ namespace AceSearch
                     return new
                     {
                         name = ch.Name,
-                        url = ch.Infohash,
+                        url = ch.InfoHash,
                         cat = !string.IsNullOrEmpty(cat) ? cat : "none"
                     };
                 }).ToArray();
