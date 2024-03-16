@@ -350,3 +350,6 @@ MigrationBackup/
 .ionide/
 
 src/Properties/launchSettings.json
+/.git
+/.idea
+

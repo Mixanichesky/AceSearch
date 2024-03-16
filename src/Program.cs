@@ -5,14 +5,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 namespace AceSearch
 {
-
     class Program
     {
         static async Task Main(string[] args)
@@ -36,31 +33,34 @@ namespace AceSearch
                 var settings = new Settings();
                 configuration.Bind(settings);
 
-                using (var handler = new HttpClientHandler())
+                using var handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback =
+                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+                using var client = new HttpClient(handler);
+                var json = await client.GetStringAsync(
+                    "https://api.acestream.me/all?api_version=1.0&api_key=test_api_key");
+
+
+                var channels = JsonSerializer.Deserialize<Channels[]>(json);
+
+                var allChannels = channels.Where(ch =>
+                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt >
+                        DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours))
+                    .GroupBy(ch => ch.Name).Select(gr => gr.First()).OrderBy(ch => ch.Name).ToList();
+
+                await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson,
+                    settings.UrlTemplate);
+
+                if (settings.CreateFavorite)
                 {
-
-                    handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-
-                    using var client = new HttpClient(handler);
-                    var json = await client.GetStringAsync(
-                        "https://api.acestream.me/all?api_version=1.0&api_key=test_api_key");
-
-
-                    var channels = JsonSerializer.Deserialize<Channels[]>(json);
-
-                    var allChannels = channels.Where(ch =>
-                        ch.Availability >= settings.Availability && ch.AvailabilityUpdatedAt > DateTime.Now.AddHours(-settings.AvailabilityUpdatedAtHours))
-                        .GroupBy(ch => ch.Name).Select(gr => gr.First()).OrderBy(ch => ch.Name).ToList();
-
-                    await SaveToFile(settings.OutputFolder, settings.PlayListAllFilename, allChannels, settings.CreateJson, settings.UrlTemplate);
-
-                    if (settings.CreateFavorite)
-                    {
-                        var fChannelsList = string.Join(", ", settings.FavoriteChannels).Split(",").Select(fch => fch.Trim()).ToList();
-                        // var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name.Contains(fch))).OrderBy(ch => ch.Name).ToList();
-                        var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name == fch)).OrderBy(ch => ch.Name).ToList();
-                        await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels, settings.CreateJson, settings.UrlTemplate);
-                    }
+                    var fChannelsList = string.Join(", ", settings.FavoriteChannels).Split(",")
+                        .Select(fch => fch.Trim()).ToList();
+                    // var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name.Contains(fch))).OrderBy(ch => ch.Name).ToList();
+                    var favoriteChannels = allChannels.Where(ch => fChannelsList.Any(fch => ch.Name == fch))
+                        .OrderBy(ch => ch.Name).ToList();
+                    await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels,
+                        settings.CreateJson, settings.UrlTemplate);
                 }
 
 
@@ -74,7 +74,8 @@ namespace AceSearch
             }
         }
 
-        private static async Task SaveToFile(string path, string fileName, List<Channels> channels, bool createJson, string urlTemplate)
+        private static async Task SaveToFile(string path, string fileName, List<Channels> channels, bool createJson,
+            string urlTemplate)
         {
             var filePath = Path.Combine(path, fileName);
             await using var writer = File.CreateText(filePath);
