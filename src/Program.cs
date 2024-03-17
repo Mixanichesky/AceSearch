@@ -41,8 +41,8 @@ namespace AceSearch
 
                 using var client = new HttpClient(handler);
                 var json = await client.GetStringAsync(
-                    "https://api.acestream.me/all?api_version=1.0&api_key=test_api_key");
-
+                    "https://search.acestream.net/all?api_version=1&api_key=test_api_key");
+                         
 
                 var channels = JsonSerializer.Deserialize<Channels[]>(json);
 
