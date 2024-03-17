@@ -8,10 +8,16 @@ namespace AceSearch
         public decimal Availability { get; set; }
         public bool CreateFavorite { get; set; }
         public bool CreateJson { get; set; }
+
+        public bool CreateAceStreamFormatPlayList { get; set; }
         public string OutputFolder { get; set; }
         public string PlayListAllFilename { get; set; }
         public string PlayListFavoriteFileName { get; set; }
+
+        public string PlayListFavoriteFileNameAsFormat { get; set; }
         public string UrlTemplate { get; set; }
+
+        public string AceStreamEngineUrl { get; set; }
         public string[] FavoriteChannels { get; set; }
     }
 }

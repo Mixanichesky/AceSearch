@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 
 namespace AceSearch
 {
@@ -62,6 +63,10 @@ namespace AceSearch
                         .OrderBy(ch => ch.Name).ToList();
                     await SaveToFile(settings.OutputFolder, settings.PlayListFavoriteFileName, favoriteChannels,
                         settings.CreateJson, settings.UrlTemplate);
+
+                    if (settings.CreateAceStreamFormatPlayList)
+                        await SaveToAceFormatFile(settings.OutputFolder, settings.PlayListFavoriteFileNameAsFormat,
+                            favoriteChannels, settings.AceStreamEngineUrl);
                 }
 
 
@@ -80,7 +85,7 @@ namespace AceSearch
         {
             var filePath = Path.Combine(path, fileName);
             await using var writer = File.CreateText(filePath);
-            writer.WriteLine("#EXTM3U");
+            await writer.WriteLineAsync("#EXTM3U");
 
             channels.ForEach(ch =>
             {
@@ -90,28 +95,63 @@ namespace AceSearch
             });
 
             if (createJson)
+                await SaveToJsonFile(path, fileName, channels);
+        }
+
+        private static async Task SaveToJsonFile(string path, string fileName, List<Channels> channels)
+        {
+            var chs = channels.Select(ch =>
             {
-                var chs = channels.Select(ch =>
+                var cat = ch.Categories != null && ch.Categories.Any() ? ch.Categories.First() : "none";
+                return new
                 {
-                    var cat = ch.Categories != null && ch.Categories.Any() ? ch.Categories.First() : "none";
-                    return new
-                    {
-                        name = ch.Name,
-                        url = ch.InfoHash,
-                        cat = !string.IsNullOrEmpty(cat) ? cat : "none"
-                    };
-                }).ToArray();
+                    name = ch.Name,
+                    url = ch.InfoHash,
+                    cat = !string.IsNullOrEmpty(cat) ? cat : "none"
+                };
+            }).ToArray();
 
-                var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
+            var jsonFileName = Path.Combine(path, Path.GetFileNameWithoutExtension(fileName) + ".json");
 
-                await using var jsonWriter = File.Create(jsonFileName);
-                await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs },
-                    new JsonSerializerOptions()
-                    {
-                        WriteIndented = true,
-                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                    });
+            await using var jsonWriter = File.Create(jsonFileName);
+            await JsonSerializer.SerializeAsync(jsonWriter, new { channels = chs },
+                new JsonSerializerOptions()
+                {
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
+        }
+
+        private static async Task SaveToAceFormatFile(string path, string fileName, List<Channels> channels,
+            string urlEngine)
+        {
+            var filePath = Path.Combine(path, fileName);
+            await using var writer = File.CreateText(filePath);
+            await writer.WriteLineAsync("#EXTM3U");
+
+            foreach (var ch in channels)
+            {
+                var chanelId = await GetChanelId(urlEngine, ch.InfoHash);
+                var aceUrl = $"acestream://{chanelId}";
+                await writer.WriteLineAsync($"#EXTINF:-1,{ch.Name}");
+                await writer.WriteLineAsync(aceUrl);
             }
+        }
+
+        private static async Task<string> GetChanelId(string urlEngine, string infoHash)
+        {
+            var url = $"{urlEngine}/server/api?method=get_content_id&infohash={infoHash}";
+
+            using var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            using var client = new HttpClient(handler);
+            var json = await client.GetStringAsync(url);
+
+            var jsonObj = JObject.Parse(json);
+            var chanelId = Convert.ToString(jsonObj["result"]?["content_id"]);
+            return chanelId;
         }
     }
 }
