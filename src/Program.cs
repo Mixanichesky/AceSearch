@@ -150,7 +150,6 @@ namespace AceSearch
             //     await writer.WriteLineAsync($"#EXTINF:-1,{ch.Name}");
             //     await writer.WriteLineAsync(aceUrl);
             // }
-            return;
         }
 
         private static async Task<string> GetChanelId(string urlEngine, string infoHash)
