@@ -125,17 +125,32 @@ namespace AceSearch
         private static async Task SaveToAceFormatFile(string path, string fileName, List<Channels> channels,
             string urlEngine)
         {
+            var content = (await Task.WhenAll(channels.Select(async ch =>
+            {
+                var chanelName = ch.Name;
+                var chanelId = await GetChanelId(urlEngine, ch.InfoHash);
+                var aceUrl = $"acestream://{chanelId}";
+                return new { Name = chanelName, AceUrl = aceUrl };
+            }))).ToList();
+
             var filePath = Path.Combine(path, fileName);
             await using var writer = File.CreateText(filePath);
             await writer.WriteLineAsync("#EXTM3U");
 
-            foreach (var ch in channels)
+            content.ForEach(c =>
             {
-                var chanelId = await GetChanelId(urlEngine, ch.InfoHash);
-                var aceUrl = $"acestream://{chanelId}";
-                await writer.WriteLineAsync($"#EXTINF:-1,{ch.Name}");
-                await writer.WriteLineAsync(aceUrl);
-            }
+                writer.WriteLine($"#EXTINF:-1,{c.Name}");
+                writer.WriteLine(c.AceUrl);
+            });
+
+            // foreach (var ch in channels)
+            // {
+            //     var chanelId = await GetChanelId(urlEngine, ch.InfoHash);
+            //     var aceUrl = $"acestream://{chanelId}";
+            //     await writer.WriteLineAsync($"#EXTINF:-1,{ch.Name}");
+            //     await writer.WriteLineAsync(aceUrl);
+            // }
+            return;
         }
 
         private static async Task<string> GetChanelId(string urlEngine, string infoHash)
