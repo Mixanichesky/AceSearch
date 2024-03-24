@@ -10,7 +10,11 @@ docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net7.0 --nam
 ```
 3. Run AceSearch: 
 ```
-dotnet AceSearch.dll <config file full name>
+whith default settings, file appsettings.json:
+./AceSearch
+
+custom file settings, filename.json:
+./AceSearch <config file full name>
 ```
 
 Sample config file:
@@ -20,13 +24,28 @@ Sample config file:
   "availabilityUpdatedAtHours": "1000",
   "createFavorite": "true",
   "createJson": "true",
+  "linkToBroadcastById": "true",
+  "useExternalAceSearch": "false",
+  "addCategories": "true",
+  "addIcons": "true",
+  "externalAceSearchUrl": "https://search.acestream.net/all?api_version=1&api_key=test_api_key",
   "outputFolder": "/opt/lists/",
   "playListAllFilename": "as.m3u",
   "playListFavoriteFileName": "f.as.m3u",
-  "urlTemplate": "acestream://{0}",
+  "aceStreamEnginePort": "6878",
   "favoriteChannels": "History,Оружие, Техно"
 }
 ```
+
+Main parametrs: 
+
+linkToBroadcastById - true, create playlist by channel id. false, create playlist by infohash
+
+useExternalAceSearch - true, getting playlist information from an external source (externalAceSearchUrl), false, from a local running AceStreamEngine
+
+
+
+
 
 .NET Install: https://dotnet.microsoft.com/download/dotnet/7.0
 
