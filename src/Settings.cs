@@ -9,15 +9,19 @@ namespace AceSearch
         public bool CreateFavorite { get; set; }
         public bool CreateJson { get; set; }
 
-        public bool CreateAceStreamFormatPlayList { get; set; }
+        public bool UseExternalAceSearch { get; set; }
+
+        public bool LinkToBroadcastById { get; set; }
+        public string ExternalAceSearchUrl { get; set; }
         public string OutputFolder { get; set; }
         public string PlayListAllFilename { get; set; }
         public string PlayListFavoriteFileName { get; set; }
 
-        public string PlayListFavoriteFileNameAsFormat { get; set; }
-        public string UrlTemplate { get; set; }
-
-        public string AceStreamEngineUrl { get; set; }
+        public long AceStreamEnginePort { get; set; }
         public string[] FavoriteChannels { get; set; }
+
+        public bool AddCategories { get; set; }
+
+        public bool AddIcons { get; set; }
     }
 }
