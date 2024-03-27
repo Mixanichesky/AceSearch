@@ -28,7 +28,7 @@ public class PlayListEngine(Settings settings)
 
     public async Task<List<Channel>> GetChannelsFromInternalSource()
     {
-        var url = "http://127.0.0.1:6878/search?&page_size=200000&page=0&query=";
+        var url = $"http://127.0.0.1:{settings.AceStreamEnginePort}/search?&page_size=200000&page=0&query=";
         using var handler = new HttpClientHandler();
         handler.ServerCertificateCustomValidationCallback =
             HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
