@@ -6,9 +6,11 @@ docker build -t ace_search .
 ```
 2. Run build project: 
 ```
-docker run -d -v <output build path>:/src/AceSearch/src/bin/Release/net7.0 --name ace_search ace_search
+docker run -d -v <output build path>:/src/publish --name ace_search ace_search
 ```
-3. Run AceSearch: 
+3. Wait until the container finishes its work and delete it
+
+4. Run AceSearch: 
 ```
 whith default settings, file appsettings.json:
 ./AceSearch
