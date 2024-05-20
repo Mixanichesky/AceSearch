@@ -7,7 +7,7 @@ docker build -t ace_search .
 
 2. Run build project: 
 ```
-docker run -d -v <your output build path>:/src/publish --name ace_search ace_search
+docker run -it -v <your output build path>:/src/publish --name ace_search ace_search
 ```
 
 3. Wait until the container finishes its work and delete it
