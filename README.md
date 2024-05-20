@@ -23,6 +23,7 @@ whith default settings, file appsettings.json:
 custom file settings, filename.json:
 ./AceSearch <config file full name>
 ```
+The application requires the libicu-dev library to run.
 
 Sample config file:
 ```
@@ -50,20 +51,3 @@ linkToBroadcastById - true, create playlist by channel id. false, create playlis
 
 useExternalAceSearch - true, getting playlist information from an external source (externalAceSearchUrl), false, from a local running AceStreamEngine
 
-
-
-
-
-.NET Install: https://dotnet.microsoft.com/download/dotnet/7.0
-
-.NET Install scripts: https://docs.microsoft.com/dotnet/core/install/linux
-
-Sample for ubuntu 20.10 
-```
-wget https://packages.microsoft.com/config/ubuntu/20.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-sudo dpkg -i packages-microsoft-prod.deb
-sudo apt-get update
-sudo apt-get install -y apt-transport-https 
-sudo apt-get update 
-sudo apt-get install -y dotnet-runtime-7.0
-```
