@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace AceSearch;
+namespace AceSearch{;
 
 public class PlayListEngine
 {
@@ -166,4 +166,4 @@ public class PlayListEngine
 
         return chanelId;
     }
-}
+}}
