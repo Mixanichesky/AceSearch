@@ -42,13 +42,19 @@ public class PlayListEngine
         using var client = new HttpClient(handler);
         var json = await client.GetStringAsync(url);
         var jsonObj = JObject.Parse(json);
-        var jsonChannels =
-            $"[\n{string.Join(",\n", jsonObj["result"]?["results"]?.Select(r => {
-                var jChannel = r["items"]?[0];
-                var iconUrl = r["icons"]?[0]?["url"];
-                if (iconUrl != null && jChannel != null) jChannel["IconUrl"] = iconUrl;
-                return jChannel?.ToString();
-            }) ?? Array.Empty<string>())}\n]";
+        var results = jsonObj["result"]?["results"] ?? new JArray();
+var channelStrings = results
+.Select(r =>
+{
+var jChannel = r["items"]?[0];
+var iconUrl = r["icons"]?[0]?["url"];
+if (iconUrl != null && jChannel != null) jChannel["IconUrl"] = iconUrl;
+return jChannel?.ToString() ?? string.Empty;
+})
+.Where(s => !string.IsNullOrEmpty(s))
+.ToList();
+
+var jsonChannels = "[\n" + string.Join(",\n", channelStrings) + "\n]";
         var channels = JsonSerializer.Deserialize<Channel[]>(jsonChannels).ToList();
 
 
