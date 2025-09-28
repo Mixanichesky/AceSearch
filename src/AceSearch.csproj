@@ -5,6 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
